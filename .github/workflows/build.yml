@@ -1,0 +1,39 @@
+name: 打包 1688 爬虫 EXE (本地浏览器版)
+
+on:
+  push:
+    branches: [ "main" ] # 或者是你使用的分支名
+  workflow_dispatch:      # 允许手动触发打包
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: 安装依赖
+        run: |
+          python -m pip install --upgrade pip
+          pip install playwright pandas openpyxl pyinstaller
+
+      - name: 打包成单文件 EXE
+        # --onefile: 打包成单个可执行文件
+        # --console: 显示控制台窗口，方便用户看到你写的 input 提示和报错
+        # --collect-all: 确保 playwright 的必要组件被包含
+        run: |
+          pyinstaller --onefile --console --name="1688数据抓取器" `
+          --collect-all playwright `
+          "自动化导出网页数据.py"
+
+      - name: 上传生成文件
+        uses: actions/upload-artifact@v4
+        with:
+          name: 1688数据抓取器-Windows版
+          path: dist/1688数据抓取器.exe
